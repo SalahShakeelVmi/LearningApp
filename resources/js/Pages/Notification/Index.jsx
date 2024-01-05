@@ -1,11 +1,28 @@
 
 import Authenticated from '@/Layouts/AuthenticatedLayout'
-import { Head,router } from '@inertiajs/react'
-import React from 'react'
+import { Head,router,usePage } from '@inertiajs/react'
+import React, { useState } from 'react'
 import moment from 'moment/moment'
 import { FaCheckCircle } from "react-icons/fa";
 import { MdNotificationsActive } from "react-icons/md";
+import PrimaryButton from '@/Components/PrimaryButton';
 const Index = ({auth, notifications,count_notifications}) => {
+
+  const [loadData, setLoadData] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const loadMore = () => {
+    setLoading(true);
+    setLoadData(loadData + 3);
+    router.visit(route('notifications.index',{load:loadData}), {
+      preserveScroll: true,
+      preserveState: true,
+      replace: false,
+      onFinish: visit => {
+        setLoading(false);
+      },
+    });
+   
+  }
 
     const updateNotification = (id) => {
         router.put(route('notification.update',{id:id}));
@@ -20,14 +37,27 @@ const Index = ({auth, notifications,count_notifications}) => {
         <Head title="Notification" />
     <div className='flex items-start justify-center mt-5'>
         <div className='bg-white rounded-lg shadow-lg p-6 w-1/2'>
-        <h1 className='mb-10 font-bold'>Notifications</h1>
 
-        {notifications.length > 0 ? (
+        <div className="flex items-center justify-between mb-10">
+    <h1 className="font-bold">Notifications</h1>
+
+    {count_notifications.length > 0 && (
+        <button
+            onClick={() => updateAllNotification()}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-200 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+        >
+            <FaCheckCircle className="me-2" color="green" />
+            Mark as all read
+        </button>
+    )}
+</div>
+
+
+        {notifications.data.length > 0 ? (
             <>
         <ol class="relative border-s border-gray-200 dark:border-gray-700">  
       
-        {notifications.map((n) => (
-            
+        {notifications.data.map((n) => (
                   
             <li class="mb-10 ms-6">            
                 <span class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900">
@@ -55,13 +85,15 @@ const Index = ({auth, notifications,count_notifications}) => {
         
         </ol>
         
-        { count_notifications.length > 0 && (
-            
-       
-        <button onClick={()=>updateAllNotification()} class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-200 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700">
-                <FaCheckCircle className='me-2' color='green' />
-                     Mark as all read</button>
-                      )}
+        {notifications.data.length < notifications.total && (
+          
+        
+        <div className='flex justify-center'>
+          <PrimaryButton disabled={loading} onClick={()=>loadMore()}  className=''>
+            {loading ? 'Loading...' : 'Load More'}
+            </PrimaryButton>
+        </div>
+        )}
         </>
         ):(<>
         <h1>No notifications found!</h1>

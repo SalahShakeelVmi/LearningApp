@@ -38,11 +38,21 @@ Route::middleware('auth')->group(function () {
 Route::prefix('dashboard')->group(function () {
 
     Route::middleware('auth')->group(function () {
-        Route::get('/notifications',function(){
-            $notifications = auth()->user()->notifications;
+        Route::get('/notifications',function(Request $request){
+
+            if(isset($request->load)){     
+                $notifications = auth()->user()->notifications()->paginate($request->load);
+             
+               
+            }
+            else{
+            
+                $notifications = auth()->user()->notifications()->paginate(5);
+            }
             return Inertia::render('Notification/Index',[
                 'notifications' => $notifications
             ]);
+
         })->name('notifications.index');
 
         Route::put('/notifications/update', function (Request $request) {
