@@ -69,3 +69,4 @@ Route::prefix('dashboard')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/dashboard/posts.php';
